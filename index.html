@@ -224,5 +224,7 @@
     document.getElementById('globalLogout')?.addEventListener('click',()=>{ localStorage.removeItem('cpps_user'); location.reload(); });
     if(localStorage.getItem('cpps_user')){ let u=JSON.parse(localStorage.getItem('cpps_user')); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=u.name; document.getElementById('userRoleBadge').innerText=u.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); }
 </script>
+    <!-- Подключение Google Sheets -->
+<script src="js/google-sheets.js"></script>
 </body>
 </html>
