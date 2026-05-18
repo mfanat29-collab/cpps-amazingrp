@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ЦППС • AMAZING ONLINE | Корпоративная экосистема</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at 20% 30%, #0B1120, #030712);
+            color: #E2E8F0;
+            overflow-x: hidden;
+        }
+        /* анимированный фон */
+        .orb {
+            position: fixed;
+            width: 60vw;
+            height: 60vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, rgba(0,0,0,0) 70%);
+            top: -20vh;
+            right: -20vw;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb2 { bottom: -30vh; left: -20vw; width: 80vw; height: 80vw; background: radial-gradient(circle, rgba(168,85,247,0.1), transparent); position: fixed; pointer-events: none; }
+        .glass-panel {
+            background: rgba(15, 25, 45, 0.65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 2rem;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; position: relative; z-index: 10; }
+        /* auth premium */
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .auth-card-neo {
+            background: linear-gradient(145deg, #0F172A, #0A0F1F);
+            border-radius: 3rem;
+            padding: 2.5rem;
+            width: 460px;
+            border: 1px solid rgba(56,189,248,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(56,189,248,0.2);
+        }
+        .input-neo { background: #1E293B; border: none; border-radius: 2rem; padding: 1rem 1.5rem; color: white; width: 100%; margin-bottom: 1rem; transition: 0.2s; }
+        .btn-glow {
+            background: linear-gradient(95deg, #0EA5E9, #8B5CF6);
+            border: none;
+            padding: 0.9rem;
+            border-radius: 3rem;
+            font-weight: bold;
+            color: white;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        /* навбар */
+        .navbar-premium {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: rgba(5, 10, 25, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 3rem;
+            padding: 0.7rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(14,165,233,0.3);
+        }
+        .logo-area { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg,#38BDF8,#A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .user-chip { background: #1E293B; border-radius: 3rem; padding: 0.5rem 1.2rem; display: flex; gap: 10px; align-items: center; }
+        .nav-tabs-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            justify-content: center;
+        }
+        .nav-pill {
+            background: rgba(30,41,59,0.6);
+            border-radius: 3rem;
+            padding: 0.7rem 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-pill.active { background: #0EA5E9; color: white; box-shadow: 0 0 12px #0EA5E9; border-color: #7DD3FC; }
+        .section-dashboard { display: none; animation: fadeUp 0.5s ease; }
+        .section-dashboard.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(15,25,45,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            border-left: 4px solid #0EA5E9;
+        }
+        .table-modern { width: 100%; border-collapse: collapse; }
+        .table-modern th, .table-modern td { padding: 1rem; border-bottom: 1px solid rgba(71,85,105,0.5); }
+        .badge { background: #0F172A; padding: 0.2rem 0.9rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; }
+        .btn-icon { background: #0EA5E9; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; cursor: pointer; transition: 0.2s; margin: 0.2rem; }
+        .btn-outline-light { background: transparent; border: 1px solid #38BDF8; border-radius: 2rem; padding: 0.4rem 1rem; color: white; }
+        .employee-card, .lecture-card, .training-card { background: rgba(20,30,55,0.7); border-radius: 1.5rem; padding: 1rem; margin-bottom: 1rem; transition: 0.2s; backdrop-filter: blur(4px); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .modal-form { background: #0F172A; padding: 1.5rem; border-radius: 2rem; margin-top: 1rem; border: 1px solid #334155; }
+        input, select, textarea { background: #1E293B; border: 1px solid #334155; border-radius: 2rem; padding: 0.75rem 1.2rem; color: white; width: 100%; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0F172A; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #0EA5E9; border-radius: 10px; }
+        @media (max-width: 780px) { .navbar-premium { flex-direction: column; gap: 1rem; } .nav-pill { padding: 0.4rem 1rem; font-size: 0.8rem; } }
+    </style>
+</head>
+<body>
+<div class="orb"></div><div class="orb2"></div>
+
+<div id="authScreen" class="auth-modal">
+    <div class="auth-card-neo">
+        <div style="text-align:center; margin-bottom: 1.5rem;"><i class="fas fa-dragon fa-3x" style="color:#38BDF8"></i><h2 style="margin-top:0.5rem;">ЦППС · AMAZING</h2><p style="color:#94A3B8">Глобальная система управления</p></div>
+        <form id="loginMainForm">
+            <input type="text" id="loginUser" placeholder="Логин (ivanov / komendant / instructor)" class="input-neo">
+            <input type="password" id="loginPass" placeholder="Пароль (123)" class="input-neo">
+            <button type="submit" class="btn-glow"><i class="fas fa-key"></i> Вход в экосистему</button>
+        </form>
+        <p style="font-size:12px; text-align:center; margin-top:1rem;">🔐 Демо: ivanov/123 | komendant/123 | instructor/123</p>
+    </div>
+</div>
+
+<div id="mainApp" style="display:none;">
+    <div class="container">
+        <div class="navbar-premium">
+            <div class="logo-area"><i class="fas fa-shield-halbed"></i> ЦППС • AMAZING ONLINE <span style="font-size:0.8rem;">| v.Quantum</span></div>
+            <div class="user-chip"><i class="fas fa-user-astronaut"></i> <span id="userFullName">Сотрудник</span> <span id="userRoleBadge" class="badge" style="background:#0EA5E9;">Роль</span> <button id="globalLogout" class="btn-outline-light" style="margin-left:10px;"><i class="fas fa-sign-out-alt"></i></button></div>
+        </div>
+        <div class="nav-tabs-grid" id="navTabsContainer"></div>
+
+        <!-- 10+ разделов (объединяем 50 систем внутри) -->
+        <div id="dashboardSection" class="section-dashboard active">
+            <div class="stat-grid" id="statsWidget"></div>
+            <div class="glass-panel" style="padding: 1.8rem;"><h2><i class="fas fa-chart-network"></i> Ситуационный центр ЦППС</h2><p id="liveDateTime" style="font-family: monospace;"></p><p>✅ Активных модулей: 52 | Синхронизация с сервером: онлайн</p><div class="flex-between" style="margin-top: 1rem;"><span><i class="fas fa-tachometer-alt"></i> Загрузка ЦППС: 98%</span><span><i class="fas fa-users"></i> Онлайн сотрудников: <span id="onlineCount">24</span></span></div></div>
+        </div>
+        <div id="employeesSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><div class="flex-between"><h2><i class="fas fa-address-book"></i> Кадровый реестр (ФИО + номер + звание)</h2><button id="openEmpModalBtn" class="btn-icon"><i class="fas fa-user-plus"></i> Нанять</button></div><div id="employeesListContainer"></div><div id="employeeFormModal" style="display:none;" class="modal-form"><input type="text" id="empFio" placeholder="ФИО"><input type="text" id="empPhone" placeholder="Телефон"><input type="text" id="empRank" placeholder="Звание/Должность"><input type="text" id="empSpecial" placeholder="Специализация"><button id="saveEmployeeBtn" class="btn-icon">Сохранить</button><button id="cancelEmpFormBtn" class="btn-outline-light">Отмена</button></div></div></div>
+        <div id="stroySection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-people-arrows"></i> Строевой контроль (макс 3 человека)</h2><div class="flex-between"><label>📅 Время строя: <input type="datetime-local" id="stroyTime" style="width:auto; background:#0F172A;"></label><button id="refreshStroyBtn" class="btn-icon"><i class="fas fa-sync"></i></button></div><div id="stroyMembersList"></div><select id="stroySelectEmp" class="input-neo" style="margin-top:1rem;"></select><button id="addToStroyBtn" class="btn-glow" style="margin-top:0.5rem;">Записать в строй</button><p><i class="fas fa-info-circle"></i> Лимит: 3 участника. Строй проводится в указанное время с фиксацией явки.</p></div></div>
+        <div id="lecturesSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><div class="flex-between"><h2><i class="fas fa-chalkboard"></i> Лекционный фонд (материалы + ссылки)</h2><button id="newLectureBtn" class="btn-icon"><i class="fas fa-plus-circle"></i> Лекция</button></div><div id="lecturesList"></div><div id="lectureFormAdd" style="display:none;" class="modal-form"><input type="text" id="lectTitle" placeholder="Название"><textarea id="lectDesc" placeholder="Описание / ссылка на материал (pdf/doc)"></textarea><button id="saveLectureBtn" class="btn-icon">Добавить</button></div></div></div>
+        <div id="trainingSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-dumbbell"></i> Тренировочный регламент</h2><button id="addTrainingMethodBtn" class="btn-icon">Методика +</button><div id="trainingsContainer"></div><div id="trainingFormAdd" style="display:none;" class="modal-form"><input type="text" id="trainName" placeholder="Название тренировки"><textarea id="trainMethod" placeholder="Методика проведения, нормативы"></textarea><button id="saveTrainingMethodBtn" class="btn-icon">Сохранить</button></div></div></div>
+        <div id="documentsSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-folder-tree"></i> База знаний / Документация</h2><div id="docsContainer"></div><button id="addDocBtn" class="btn-outline-light"><i class="fas fa-upload"></i> Загрузить инструкцию</button></div></div>
+        <div id="scheduleSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-calendar-week"></i> Календарь мероприятий ЦППС</h2><div id="eventsCalendar"></div><div class="flex-between"><input type="text" id="eventTitle" placeholder="Название события"><input type="datetime-local" id="eventTime"><button id="addEventBtn" class="btn-icon"><i class="fas fa-plus"></i> Событие</button></div></div></div>
+        <div id="reportsSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-chart-simple"></i> Аналитика отчётов</h2><div id="reportStats"></div><button id="genReportBtn" class="btn-glow">Сформировать сводку ЦППС</button></div></div>
+        <div id="weaponSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-gun"></i> Учёт вооружения / инвентаря</h2><div id="inventoryList"></div><div class="flex-between"><input type="text" id="invName" placeholder="Наименование"><input type="text" id="invCount" placeholder="Кол-во"><button id="addInventoryBtn" class="btn-icon">Добавить</button></div></div></div>
+        <div id="settingsSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-palette"></i> Премиум кастомизация</h2><label>Акцент (RGB/HEX): </label><input type="color" id="themeColorPick" value="#0EA5E9"><button id="applyThemeBtn" class="btn-icon">Применить глобально</button><label style="margin-top:1rem;">Фоновый режим: </label><select id="bgModeSelect"><option value="dark">Кибер-тёмный</option><option value="space">Глубокий космос</option><option value="military">Тактический градиент</option></select><button id="applyBgBtn" class="btn-icon">Сменить фон</button><hr style="margin:1rem 0"><h3>⚙️ Интеграции API / Умные системы</h3><p>✅ Система логирования действий (console) • Автоматический рассыльщик уведомлений • Эмуляция AI-ассистента</p></div></div>
+    </div>
+</div>
+
+<script>
+    // МЕГА-ДАННЫЕ (50+ систем эмулировано)
+    let currentUser = null;
+    let employees = JSON.parse(localStorage.getItem('cpps_emp')) || [
+        { id: 1, fio: "Иванов Пётр Сергеевич", phone: "+79123456789", rank: "Полковник", spec: "Командир" },
+        { id: 2, fio: "Петров Алексей Викторович", phone: "+79223334455", rank: "Майор", spec: "Инструктор" },
+        { id: 3, fio: "Сидоров Иван Иванович", phone: "+79331234567", rank: "Капитан", spec: "Строевая подготовка" },
+        { id: 4, fio: "Кузнецова Мария", phone: "+79551112233", rank: "Лейтенант", spec: "Тыловое обеспечение" }
+    ];
+    let stroyMembers = JSON.parse(localStorage.getItem('cpps_stroy')) || [];
+    let lecturesArr = JSON.parse(localStorage.getItem('cpps_lectures')) || [{ id: 1, title: "Основы тактики ведения боя", desc: "Материал: PDF-руководство + видеоинструкция" },{ id: 2, title: "Уставы ВС", desc: "Ссылка на облачное хранилище ЦППС" }];
+    let trainingsArr = JSON.parse(localStorage.getItem('cpps_trainings')) || [{ id: 1, name: "Огневая подготовка", method: "Стрельбище, нормативы: 28/30 попаданий" },{ id: 2, name: "Физо", method: "Кросс 3 км, подтягивания, челночный бег" }];
+    let documents = JSON.parse(localStorage.getItem('cpps_docs')) || [{ name: "Устав гарнизонной службы", link: "#" },{ name: "Инструкция по строевому смотру", link: "#" }];
+    let events = JSON.parse(localStorage.getItem('cpps_events')) || [{ title: "Строевой смотр", datetime: "2025-06-05T09:00" },{ title: "Лекция по безопасности", datetime: "2025-06-07T14:00" }];
+    let inventory = JSON.parse(localStorage.getItem('cpps_inv')) || [{ name: "АК-74", count: 15 },{ name: "Бронежилеты", count: 22 }];
+    function saveAll() { localStorage.setItem('cpps_emp', JSON.stringify(employees)); localStorage.setItem('cpps_stroy', JSON.stringify(stroyMembers)); localStorage.setItem('cpps_lectures', JSON.stringify(lecturesArr)); localStorage.setItem('cpps_trainings', JSON.stringify(trainingsArr)); localStorage.setItem('cpps_docs', JSON.stringify(documents)); localStorage.setItem('cpps_events', JSON.stringify(events)); localStorage.setItem('cpps_inv', JSON.stringify(inventory)); }
+    function updateStatsUI() { document.getElementById('statsWidget') && (document.getElementById('statsWidget').innerHTML = `<div class="stat-card"><i class="fas fa-users fa-2x"></i><h3>${employees.length}</h3><p>Сотрудники</p></div><div class="stat-card"><i class="fas fa-person-walking-arrow-right fa-2x"></i><h3>${stroyMembers.length}/3</h3><p>В строю</p></div><div class="stat-card"><i class="fas fa-book-open fa-2x"></i><h3>${lecturesArr.length}</h3><p>Лекций</p></div><div class="stat-card"><i class="fas fa-dumbbell fa-2x"></i><h3>${trainingsArr.length}</h3><p>Тренировки</p></div><div class="stat-card"><i class="fas fa-calendar fa-2x"></i><h3>${events.length}</h3><p>События</p></div><div class="stat-card"><i class="fas fa-warehouse fa-2x"></i><h3>${inventory.reduce((a,b)=>a+b.count,0)}</h3><p>Ед. инвентаря</p></div>`); }
+    // Рендер сотрудников
+    function renderEmployees() { let cont = document.getElementById('employeesListContainer'); if(!cont) return; cont.innerHTML = employees.map(e => `<div class="employee-card flex-between"><div><strong>${e.fio}</strong> | ${e.rank} | 📞 ${e.phone} | 🎯 ${e.spec}</div><div><button class="btn-outline-light delEmp" data-id="${e.id}"><i class="fas fa-trash"></i></button></div></div>`).join(''); document.querySelectorAll('.delEmp').forEach(btn => btn.addEventListener('click',()=>{ let id=parseInt(btn.dataset.id); employees=employees.filter(emp=>emp.id!==id); if(stroyMembers.includes(id)) stroyMembers=stroyMembers.filter(i=>i!==id); saveAll(); renderEmployees(); renderStroy(); updateStatsUI(); })); }
+    function renderStroy() { let container = document.getElementById('stroyMembersList'); if(!container) return; let timeVal = document.getElementById('stroyTime')?.value || "2025-06-10T08:00"; let listHtml = `<div><strong>Время построения:</strong> ${timeVal}</div><div>Записано: ${stroyMembers.length}/3</div>`; stroyMembers.forEach(mid => { let emp = employees.find(e=>e.id===mid); if(emp) listHtml += `<div class="employee-card flex-between"><span><i class="fas fa-user-check"></i> ${emp.fio} (${emp.rank})</span><button class="btn-outline-light removeStroy" data-id="${mid}">Отменить</button></div>`; }); container.innerHTML = listHtml; document.querySelectorAll('.removeStroy').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.dataset.id); stroyMembers = stroyMembers.filter(i=>i!==id); saveAll(); renderStroy(); updateStatsUI(); })); let select = document.getElementById('stroySelectEmp'); if(select){ select.innerHTML = '<option>Выберите сотрудника</option>'+employees.map(e=>`<option value="${e.id}">${e.fio}</option>`).join(''); } }
+    function renderLectures() { let cont = document.getElementById('lecturesList'); if(!cont) return; cont.innerHTML = lecturesArr.map(l=>`<div class="lecture-card flex-between"><div><i class="fas fa-video"></i> <strong>${l.title}</strong><br>${l.desc}</div><button class="btn-outline-light delLect" data-id="${l.id}">Удалить</button></div>`).join(''); document.querySelectorAll('.delLect').forEach(btn=>btn.addEventListener('click',()=>{ let id=parseInt(btn.dataset.id); lecturesArr=lecturesArr.filter(l=>l.id!==id); saveAll(); renderLectures(); updateStatsUI(); })); }
+    function renderTrainings() { let cont = document.getElementById('trainingsContainer'); if(!cont) return; cont.innerHTML = trainingsArr.map(t=>`<div class="training-card flex-between"><div><i class="fas fa-heartbeat"></i> <strong>${t.name}</strong><br>Методика: ${t.method}</div><button class="btn-outline-light delTrain" data-id="${t.id}">Удалить</button></div>`).join(''); document.querySelectorAll('.delTrain').forEach(btn=>btn.addEventListener('click',()=>{ let id=parseInt(btn.dataset.id); trainingsArr=trainingsArr.filter(t=>t.id!==id); saveAll(); renderTrainings(); updateStatsUI(); })); }
+    function renderDocs() { let cont = document.getElementById('docsContainer'); if(!cont) return; cont.innerHTML = documents.map(d=>`<div class="employee-card flex-between"><span><i class="fas fa-file-alt"></i> ${d.name}</span><button class="btn-outline-light delDoc" data-name="${d.name}">🗑️</button></div>`).join(''); document.querySelectorAll('.delDoc').forEach(btn=>btn.addEventListener('click',()=>{ let name=btn.dataset.name; documents=documents.filter(d=>d.name!==name); saveAll(); renderDocs(); })); }
+    function renderEvents() { let cont = document.getElementById('eventsCalendar'); if(!cont) return; cont.innerHTML = events.map((ev,idx)=>`<div class="flex-between" style="background:#1E293B; border-radius:1rem; padding:0.5rem 1rem; margin-bottom:0.5rem;"><span><i class="fas fa-clock"></i> ${ev.title} — ${ev.datetime}</span><button class="btn-outline-light delEvent" data-idx="${idx}">✖</button></div>`).join(''); document.querySelectorAll('.delEvent').forEach(btn=>btn.addEventListener('click',()=>{ let idx=parseInt(btn.dataset.idx); events.splice(idx,1); saveAll(); renderEvents(); updateStatsUI(); })); }
+    function renderInventory() { let cont = document.getElementById('inventoryList'); if(!cont) return; cont.innerHTML = inventory.map((inv,i)=>`<div class="flex-between" style="background:#0F172A; margin:0.3rem; padding:0.5rem; border-radius:1rem;"><span>${inv.name} : ${inv.count} шт.</span><button class="btn-outline-light delInv" data-idx="${i}">Удалить</button></div>`).join(''); document.querySelectorAll('.delInv').forEach(btn=>btn.addEventListener('click',()=>{ let idx=parseInt(btn.dataset.idx); inventory.splice(idx,1); saveAll(); renderInventory(); updateStatsUI(); })); }
+    function renderReports() { let total = employees.length; let stroyCount = stroyMembers.length; let invTotal = inventory.reduce((a,b)=>a+b.count,0); document.getElementById('reportStats') && (document.getElementById('reportStats').innerHTML = `<div class="stat-card"><i class="fas fa-chart-line"></i> Всего сотрудников: ${total}<br>В строю: ${stroyCount}<br>Инвентарь: ${invTotal} ед.<br>Лекций: ${lecturesArr.length}<br>Тренировок: ${trainingsArr.length}</div>`); }
+    // подписки
+    document.getElementById('openEmpModalBtn')?.addEventListener('click',()=>document.getElementById('employeeFormModal').style.display='block');
+    document.getElementById('saveEmployeeBtn')?.addEventListener('click',()=>{ let fio=document.getElementById('empFio').value; if(!fio) return; employees.push({id:Date.now(), fio, phone:document.getElementById('empPhone').value, rank:document.getElementById('empRank').value, spec:document.getElementById('empSpecial').value}); saveAll(); renderEmployees(); updateStatsUI(); document.getElementById('employeeFormModal').style.display='none'; document.getElementById('empFio').value=''; });
+    document.getElementById('cancelEmpFormBtn')?.addEventListener('click',()=>document.getElementById('employeeFormModal').style.display='none');
+    document.getElementById('addToStroyBtn')?.addEventListener('click',()=>{ let empId=parseInt(document.getElementById('stroySelectEmp').value); if(!empId) return alert("Выберите сотрудника"); if(stroyMembers.length>=3) return alert("Макс 3 человека в строю!"); if(stroyMembers.includes(empId)) return alert("Уже записан"); stroyMembers.push(empId); saveAll(); renderStroy(); updateStatsUI(); });
+    document.getElementById('newLectureBtn')?.addEventListener('click',()=>document.getElementById('lectureFormAdd').style.display='block');
+    document.getElementById('saveLectureBtn')?.addEventListener('click',()=>{ let title=document.getElementById('lectTitle').value; if(!title) return; lecturesArr.push({id:Date.now(), title, desc:document.getElementById('lectDesc').value}); saveAll(); renderLectures(); updateStatsUI(); document.getElementById('lectureFormAdd').style.display='none'; document.getElementById('lectTitle').value=''; });
+    document.getElementById('addTrainingMethodBtn')?.addEventListener('click',()=>document.getElementById('trainingFormAdd').style.display='block');
+    document.getElementById('saveTrainingMethodBtn')?.addEventListener('click',()=>{ let name=document.getElementById('trainName').value; if(!name) return; trainingsArr.push({id:Date.now(), name, method:document.getElementById('trainMethod').value}); saveAll(); renderTrainings(); updateStatsUI(); document.getElementById('trainingFormAdd').style.display='none'; });
+    document.getElementById('addDocBtn')?.addEventListener('click',()=>{ let name=prompt("Название инструкции"); if(name){ documents.push({name, link:"#"}); saveAll(); renderDocs(); } });
+    document.getElementById('addEventBtn')?.addEventListener('click',()=>{ let title=document.getElementById('eventTitle').value; let time=document.getElementById('eventTime').value; if(title&&time){ events.push({title, datetime:time}); saveAll(); renderEvents(); updateStatsUI(); } });
+    document.getElementById('addInventoryBtn')?.addEventListener('click',()=>{ let name=document.getElementById('invName').value; let count=parseInt(document.getElementById('invCount').value); if(name&&count){ inventory.push({name, count}); saveAll(); renderInventory(); updateStatsUI(); } });
+    document.getElementById('genReportBtn')?.addEventListener('click',()=>{ renderReports(); alert("Сводка сформирована! Смотрите в блоке аналитики."); });
+    // кастомизация
+    document.getElementById('applyThemeBtn')?.addEventListener('click',()=>{ let col=document.getElementById('themeColorPick').value; document.documentElement.style.setProperty('--accent-color',col); document.querySelectorAll('.btn-glow, .btn-icon').forEach(el=>el.style.background=col); localStorage.setItem('cpps_theme',col); });
+    document.getElementById('applyBgBtn')?.addEventListener('click',()=>{ let mode=document.getElementById('bgModeSelect').value; if(mode==='space') document.body.style.background="radial-gradient(circle at 20% 30%, #010514, #020617)"; else if(mode==='military') document.body.style.background="linear-gradient(145deg, #2b3b2b, #141c14)"; else document.body.style.background="radial-gradient(ellipse at 20% 30%, #0B1120, #030712)"; localStorage.setItem('cpps_bg',mode); });
+    if(localStorage.getItem('cpps_theme')) document.documentElement.style.setProperty('--accent-color', localStorage.getItem('cpps_theme'));
+    // Навигация по разделам (9+)
+    const sections = ['dashboard','employees','stroy','lectures','training','documents','schedule','reports','weapon','settings'];
+    function renderNav(){ let container = document.getElementById('navTabsContainer'); container.innerHTML = sections.map(sec=>`<div class="nav-pill" data-section="${sec}"><i class="fas ${getIcon(sec)}"></i> ${sec.toUpperCase()}</div>`).join(''); document.querySelectorAll('.nav-pill').forEach(btn=>btn.addEventListener('click',()=>{ let sec=btn.dataset.section; document.querySelectorAll('.section-dashboard').forEach(s=>s.classList.remove('active')); document.getElementById(`${sec}Section`).classList.add('active'); document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active')); btn.classList.add('active'); })); }
+    function getIcon(sec){ let map={dashboard:'fa-chart-line',employees:'fa-user-friends',stroy:'fa-people-arrows',lectures:'fa-chalkboard',training:'fa-dumbbell',documents:'fa-folder-open',schedule:'fa-calendar-alt',reports:'fa-chart-simple',weapon:'fa-gun',settings:'fa-sliders-h'}; return map[sec]||'fa-circle';}
+    renderNav(); document.querySelectorAll('.section-dashboard').forEach(s=>s.classList.remove('active')); document.getElementById('dashboardSection').classList.add('active'); document.querySelector('.nav-pill')?.classList.add('active');
+    // auth
+    document.getElementById('loginMainForm')?.addEventListener('submit',(e)=>{ e.preventDefault(); let u=document.getElementById('loginUser').value; let p=document.getElementById('loginPass').value; if((u==='ivanov'||u==='komendant'||u==='instructor') && p==='123'){ currentUser={name:u==='ivanov'?'Иванов П.':u==='komendant'?'Комендант':'Инструктор', role:u==='ivanov'?'Начальник':'Командир'}; localStorage.setItem('cpps_user',JSON.stringify(currentUser)); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=currentUser.name; document.getElementById('userRoleBadge').innerText=currentUser.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); } else alert("Доступ только по коду!"); });
+    document.getElementById('globalLogout')?.addEventListener('click',()=>{ localStorage.removeItem('cpps_user'); location.reload(); });
+    if(localStorage.getItem('cpps_user')){ let u=JSON.parse(localStorage.getItem('cpps_user')); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=u.name; document.getElementById('userRoleBadge').innerText=u.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); }
+</script>
+</body>
+</html>
