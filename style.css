@@ -474,3 +474,18 @@ hr {
     z-index: 1000;
     animation: fadeUp 0.3s ease;
 }
+/* Стили для заявок */
+.request-card {
+    background: rgba(20,30,55,0.7);
+    border-radius: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(4px);
+    border-left: 3px solid #F59E0B;
+}
+.request-card.pending { border-left-color: #F59E0B; }
+.request-card.accepted { border-left-color: #10B981; opacity: 0.7; }
+.request-card.rejected { border-left-color: #EF4444; opacity: 0.7; }
+.badge-pending { background: #F59E0B; color: #1a1a2e; }
+.badge-accepted { background: #10B981; }
+.badge-rejected { background: #EF4444; }
