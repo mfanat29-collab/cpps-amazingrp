@@ -2,7 +2,7 @@
 // ЦППС - ПОЛНАЯ СИНХРОНИЗАЦИЯ (чтение + запись)
 // ============================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwapwnG9O2SihT8S8J3-ng-k1x_vTdt4lE6GO4ZdoLaG0HPw1MSCYNJSJZ5LIaOr8us1A/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzJv08UV_UrK98pFZ9KtXvbGnYp0sTyBSwsMLF3LaNpr3znLyw9ExigyVifRzHfOA75/exec';
 
 // ЗАГРУЗКА ДАННЫХ
 async function loadAllData() {
