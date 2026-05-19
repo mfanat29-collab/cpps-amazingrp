@@ -2,7 +2,7 @@
 // ЦППС - РАБОЧАЯ ВЕРСИЯ (JSONP + POST)
 // ============================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbyVViDsfp2jNYMdjah0oKTfywLIo4jRAMN9NgWaUKfurfbJnKPaJ9KhQwwqrTnV2VSWNA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwG2hmFRFdiC1hgo3fGzHbMI8nOxAzgdDhR9fILcZZuvEsu45mNOoIejKqF1Wc25K3wiA/exec';
 
 // ========== ЗАГРУЗКА ДАННЫХ (JSONP - без CORS) ==========
 function loadAllData() {
