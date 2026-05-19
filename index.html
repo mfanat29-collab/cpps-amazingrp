@@ -516,6 +516,229 @@ if (document.readyState === 'loading') {
 // Также запускаем после каждого обновления данных (если есть MutationObserver)
 const observer = new MutationObserver(() => setupDeleteHandlers());
 observer.observe(document.body, { childList: true, subtree: true });
+// ========== СИСТЕМА ЗАЯВОК ==========
+
+// Загрузка заявок из localStorage
+let requests = JSON.parse(localStorage.getItem('cpps_requests')) || [];
+
+// Текущий пользователь (кто принял)
+let currentAcceptor = '';
+
+// Получаем имя текущего пользователя
+function getCurrentUserName() {
+    const userSpan = document.getElementById('userFullName');
+    return userSpan ? userSpan.innerText : 'Система';
+}
+
+// Сохранение заявок
+function saveRequests() {
+    localStorage.setItem('cpps_requests', JSON.stringify(requests));
+}
+
+// Рендер заявок
+function renderRequests() {
+    const container = document.getElementById('requestsList');
+    if (!container) return;
+    
+    const currentUser = getCurrentUserName();
+    const isAdmin = document.getElementById('userRoleBadge')?.innerText === 'Начальник';
+    
+    if (requests.length === 0) {
+        container.innerHTML = `<div class="glass-panel" style="text-align:center; padding:2rem;">
+            <i class="fas fa-inbox fa-3x" style="color:#38BDF8"></i>
+            <p>Нет активных заявок</p>
+            <p style="font-size:12px;">Нажмите "Подать заявку" чтобы вступить в ряды ЦППС</p>
+        </div>`;
+        return;
+    }
+    
+    container.innerHTML = requests.map(req => `
+        <div class="request-card ${req.status}" data-id="${req.id}">
+            <div class="flex-between">
+                <div>
+                    <strong><i class="fas fa-user"></i> ${req.fio}</strong><br>
+                    <span class="badge">⭐ ${req.rank}</span>
+                    <span class="badge">📋 ${req.position}</span>
+                    <span class="badge">📅 ${req.date}</span>
+                </div>
+                <div>
+                    <span class="badge ${req.status === 'pending' ? 'badge-pending' : (req.status === 'accepted' ? 'badge-accepted' : 'badge-rejected')}">
+                        ${req.status === 'pending' ? '⏳ Ожидает' : (req.status === 'accepted' ? '✅ Принят' : '❌ Отклонён')}
+                    </span>
+                </div>
+            </div>
+            ${req.acceptedBy ? `<div style="margin-top:0.5rem; font-size:12px; color:#94A3B8;">Принял: ${req.acceptedBy}</div>` : ''}
+            ${req.status === 'pending' && isAdmin ? `
+                <div style="margin-top:1rem;">
+                    <button class="btn-icon acceptReq" data-id="${req.id}" style="background:#10B981;">✅ Принять</button>
+                    <button class="btn-outline-light rejectReq" data-id="${req.id}" style="border-color:#EF4444; color:#EF4444;">❌ Отклонить</button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+    
+    // Обработчики для кнопок принятия/отклонения
+    document.querySelectorAll('.acceptReq').forEach(btn => {
+        btn.addEventListener('click', () => acceptRequest(parseInt(btn.dataset.id)));
+    });
+    document.querySelectorAll('.rejectReq').forEach(btn => {
+        btn.addEventListener('click', () => rejectRequest(parseInt(btn.dataset.id)));
+    });
+}
+
+// Подача заявки
+function submitRequest() {
+    const fio = document.getElementById('reqFio').value.trim();
+    const rank = document.getElementById('reqRank').value.trim();
+    const position = document.getElementById('reqPosition').value.trim();
+    const date = document.getElementById('reqDate').value;
+    
+    if (!fio || !rank || !position || !date) {
+        alert('Заполните все поля!');
+        return;
+    }
+    
+    const newRequest = {
+        id: Date.now(),
+        fio: fio,
+        rank: rank,
+        position: position,
+        date: date,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        acceptedBy: null
+    };
+    
+    requests.push(newRequest);
+    saveRequests();
+    renderRequests();
+    
+    // Очищаем форму и скрываем
+    document.getElementById('reqFio').value = '';
+    document.getElementById('reqRank').value = '';
+    document.getElementById('reqPosition').value = '';
+    document.getElementById('reqDate').value = '';
+    document.getElementById('requestForm').style.display = 'none';
+    
+    showToast('✅ Заявка отправлена! Ожидайте решения.');
+}
+
+// Принятие заявки
+function acceptRequest(id) {
+    const request = requests.find(r => r.id === id);
+    if (!request) return;
+    
+    request.status = 'accepted';
+    request.acceptedBy = getCurrentUserName();
+    saveRequests();
+    
+    // Добавляем сотрудника в основной список
+    const newEmployee = {
+        id: Date.now(),
+        fio: request.fio,
+        phone: '',
+        rank: request.rank,
+        spec: request.position
+    };
+    
+    if (typeof employees !== 'undefined') {
+        employees.push(newEmployee);
+        if (typeof saveAll === 'function') saveAll();
+        if (typeof renderEmployees === 'function') renderEmployees();
+        if (typeof updateStatsUI === 'function') updateStatsUI();
+    }
+    
+    renderRequests();
+    showToast(`✅ Заявка от ${request.fio} принята! Сотрудник добавлен.`);
+}
+
+// Отклонение заявки
+function rejectRequest(id) {
+    const request = requests.find(r => r.id === id);
+    if (!request) return;
+    
+    request.status = 'rejected';
+    request.acceptedBy = getCurrentUserName();
+    saveRequests();
+    renderRequests();
+    showToast(`❌ Заявка от ${request.fio} отклонена.`);
+}
+
+// Показать/скрыть форму заявки
+document.getElementById('showRequestFormBtn')?.addEventListener('click', () => {
+    document.getElementById('requestForm').style.display = 'block';
+});
+document.getElementById('cancelRequestBtn')?.addEventListener('click', () => {
+    document.getElementById('requestForm').style.display = 'none';
+});
+document.getElementById('submitRequestBtn')?.addEventListener('click', submitRequest);
+
+// Добавляем секцию в навигацию (если ещё не добавлена)
+const sections = ['dashboard', 'employees', 'stroy', 'lectures', 'training', 'documents', 'schedule', 'reports', 'weapon', 'settings', 'requests'];
+
+// Обновляем функцию рендера навигации
+function renderNavWithRequests() {
+    let container = document.getElementById('navTabsContainer');
+    if (!container) return;
+    
+    container.innerHTML = sections.map(sec => `
+        <div class="nav-pill" data-section="${sec}">
+            <i class="fas ${getIconWithRequests(sec)}"></i> 
+            ${sec === 'requests' ? 'ЗАЯВКИ' : sec.toUpperCase()}
+        </div>
+    `).join('');
+    
+    document.querySelectorAll('.nav-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            let sec = btn.dataset.section;
+            document.querySelectorAll('.section-dashboard').forEach(s => s.classList.remove('active'));
+            let targetSection = document.getElementById(`${sec}Section`);
+            if (targetSection) targetSection.classList.add('active');
+            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+}
+
+function getIconWithRequests(sec) {
+    const map = {
+        dashboard: 'fa-chart-line',
+        employees: 'fa-user-friends',
+        stroy: 'fa-people-arrows',
+        lectures: 'fa-chalkboard',
+        training: 'fa-dumbbell',
+        documents: 'fa-folder-open',
+        schedule: 'fa-calendar-alt',
+        reports: 'fa-chart-simple',
+        weapon: 'fa-gun',
+        settings: 'fa-sliders-h',
+        requests: 'fa-file-signature'
+    };
+    return map[sec] || 'fa-circle';
+}
+
+// Переопределяем рендер навигации
+if (typeof renderNav === 'function') {
+    // Если есть старая функция, заменяем
+    window.renderNav = renderNavWithRequests;
+}
+renderNavWithRequests();
+
+// Загружаем заявки при старте
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => renderRequests());
+} else {
+    renderRequests();
+}
+
+// Обновляем рендер заявок после синхронизации
+const originalLoadAllData = window.loadAllData;
+if (originalLoadAllData) {
+    window.loadAllData = async function() {
+        await originalLoadAllData();
+        renderRequests();
+    };
+}
 </script>
     <!-- Подключение Google Sheets -->
 <script src="js/google-sheets.js"></script>
