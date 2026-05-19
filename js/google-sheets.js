@@ -1,5 +1,49 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzQMAFF6ddjuuayjiidg6yQiYyOI0Oo34TOGCaMEmzQxSYC6kYFHVnGpXajj2wQJ7EnFw/exec';
 
+// ========== УДАЛЕНИЕ ==========
+async function syncDeleteEmployee(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deleteEmployee', id: id })
+        });
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Сотрудник удалён из таблицы!');
+    } catch(e) { showToast('❌ Ошибка удаления'); }
+}
+
+async function syncDeleteLecture(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deleteLecture', id: id })
+        });
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Лекция удалена!');
+    } catch(e) { showToast('❌ Ошибка'); }
+}
+
+async function syncDeleteTraining(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deleteTraining', id: id })
+        });
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Тренировка удалена!');
+    } catch(e) { showToast('❌ Ошибка'); }
+}
+
+async function syncDeleteInventory(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deleteInventory', id: id })
+        });
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Инвентарь удалён!');
+    } catch(e) { showToast('❌ Ошибка'); }
+}
 async function loadAllData() {
     console.log('🔄 Загрузка...');
     try {
