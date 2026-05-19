@@ -1,28 +1,32 @@
 // ============================================
-// ЦППС - ПОЛНАЯ СИНХРОНИЗАЦИЯ (чтение + запись)
+// ЦППС - JSONP версия (работает без CORS)
 // ============================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxH-mtUYucl55UdqJ1VjkbfDzUr-zD0uXO7VKwileLVVz62CiNCMs9xLVdT7i_eqcsjUw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbyVViDsfp2jNYMdjah0oKTfywLIo4jRAMN9NgWaUKfurfbJnKPaJ9KhQwwqrTnV2VSWNA/exec';
 
-// ЗАГРУЗКА ДАННЫХ
-async function loadAllData() {
-    console.log('🔄 Загрузка данных из Google Sheets...');
+// Загрузка данных через JSONP
+function loadAllData() {
+    console.log('🔄 Загрузка данных...');
     showToast('📡 Синхронизация...');
     
-    try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        
+    // Создаём уникальное имя для callback
+    const callbackName = 'jsonp_callback_' + Date.now();
+    
+    // Создаём глобальную функцию для получения данных
+    window[callbackName] = function(data) {
+        // Получили данные
         window.employees = data.employees || [];
         window.lecturesArr = data.lectures || [];
         window.trainingsArr = data.trainings || [];
         window.inventory = data.inventory || [];
         
+        // Сохраняем в localStorage
         localStorage.setItem('cpps_emp', JSON.stringify(window.employees));
         localStorage.setItem('cpps_lectures', JSON.stringify(window.lecturesArr));
         localStorage.setItem('cpps_trainings', JSON.stringify(window.trainingsArr));
         localStorage.setItem('cpps_inv', JSON.stringify(window.inventory));
         
+        // Обновляем интерфейс
         if (typeof renderEmployees === 'function') renderEmployees();
         if (typeof renderLectures === 'function') renderLectures();
         if (typeof renderTrainings === 'function') renderTrainings();
@@ -30,41 +34,50 @@ async function loadAllData() {
         if (typeof updateStatsUI === 'function') updateStatsUI();
         
         console.log('✅ Загружено:', window.employees.length, 'сотрудников');
-        showToast('✅ Синхронизация завершена!');
+        showToast('✅ Данные обновлены!');
         
-    } catch (error) {
-        console.error('❌ Ошибка:', error);
-        showToast('⚠️ Ошибка соединения');
-    }
+        // Удаляем временный скрипт
+        delete window[callbackName];
+        document.body.removeChild(script);
+    };
+    
+    // Создаём JSONP запрос
+    const script = document.createElement('script');
+    script.src = `${API_URL}?callback=${callbackName}`;
+    document.body.appendChild(script);
+    
+    // Таймаут на случай ошибки
+    setTimeout(() => {
+        if (window[callbackName]) {
+            delete window[callbackName];
+            showToast('⚠️ Ошибка соединения');
+        }
+    }, 10000);
 }
 
-// ДОБАВЛЕНИЕ СОТРУДНИКА
+// Добавление сотрудника (через POST)
 async function syncAddEmployee(employee) {
     try {
-        const response = await fetch(API_URL, {
+        showToast('📤 Отправка...');
+        
+        await fetch(API_URL, {
             method: 'POST',
-            mode: 'no-cors',           // ← ЭТУ СТРОКУ ДОБАВИТЬ!
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addEmployee', employee: employee })
         });
-        const result = await response.json();
         
-        if (result.success) {
-            await loadAllData(); // Перезагружаем данные
-            showToast('✅ Сотрудник добавлен!');
-            return true;
-        } else {
-            showToast('❌ Ошибка: ' + result.error);
-            return false;
-        }
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Сотрудник добавлен!');
+        return true;
+        
     } catch (error) {
-        console.error(error);
-        showToast('❌ Ошибка отправки');
+        console.error('Ошибка:', error);
+        showToast('❌ Ошибка');
         return false;
     }
 }
 
-// ДОБАВЛЕНИЕ ЛЕКЦИИ
 async function syncAddLecture(lecture) {
     try {
         await fetch(API_URL, {
@@ -73,14 +86,13 @@ async function syncAddLecture(lecture) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addLecture', lecture: lecture })
         });
-        await loadAllData();
+        setTimeout(() => loadAllData(), 1000);
         showToast('✅ Лекция добавлена!');
     } catch (error) {
         showToast('❌ Ошибка');
     }
 }
 
-// ДОБАВЛЕНИЕ ТРЕНИРОВКИ
 async function syncAddTraining(training) {
     try {
         await fetch(API_URL, {
@@ -89,14 +101,13 @@ async function syncAddTraining(training) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addTraining', training: training })
         });
-        await loadAllData();
+        setTimeout(() => loadAllData(), 1000);
         showToast('✅ Тренировка добавлена!');
     } catch (error) {
         showToast('❌ Ошибка');
     }
 }
 
-// ДОБАВЛЕНИЕ ИНВЕНТАРЯ
 async function syncAddInventory(item) {
     try {
         await fetch(API_URL, {
@@ -105,14 +116,13 @@ async function syncAddInventory(item) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addInventory', inventory: item })
         });
-        await loadAllData();
+        setTimeout(() => loadAllData(), 1000);
         showToast('✅ Инвентарь добавлен!');
     } catch (error) {
         showToast('❌ Ошибка');
     }
 }
 
-// УВЕДОМЛЕНИЯ
 function showToast(message) {
     let toast = document.querySelector('.cpps-toast');
     if (!toast) {
@@ -123,6 +133,7 @@ function showToast(message) {
             background: #1E293B; border-left: 4px solid #0EA5E9;
             border-radius: 12px; padding: 12px 20px;
             color: white; font-size: 14px; z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         `;
         document.body.appendChild(toast);
     }
@@ -131,11 +142,11 @@ function showToast(message) {
     setTimeout(() => { toast.style.display = 'none'; }, 3000);
 }
 
-// АВТО-ОБНОВЛЕНИЕ КАЖДЫЕ 10 СЕКУНД
-async function initSync() {
-    await loadAllData();
-    setInterval(() => loadAllData(), 10000);
-    console.log('✅ Система синхронизации запущена!');
+// Запуск
+function initSync() {
+    loadAllData();
+    setInterval(() => loadAllData(), 15000);
+    console.log('✅ Синхронизация запущена (JSONP)');
 }
 
 initSync();
