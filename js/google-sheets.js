@@ -4,7 +4,6 @@
 
 // 🔴 ВАЖНО: ЗАМЕНИ ЭТУ СТРОКУ НА ТВОЮ ССЫЛКУ ИЗ APPS SCRIPT!
 const API_URL = 'https://script.google.com/macros/s/AKfycbxIBkKxfT3amNpwM9UydZKSFSBudtTJ_F0taZAUpJnwVdcDS-CGn73UaOBFEv4XLkr3eQ/exec';
-
 // ============ 1. ЗАГРУЗКА ДАННЫХ (ЧТЕНИЕ) ============
 async function loadAllData() {
     console.log('🔄 Загрузка данных из Google Sheets...');
