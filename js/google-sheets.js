@@ -1,227 +1,341 @@
 // ============================================
-// Google Sheets подключение для ЦППС
+// ЦППС - Полная синхронизация с Google Sheets
 // ============================================
 
-// ЗАМЕНИ ЭТО НА ТВОЙ ID ИЗ ГУГЛ ТАБЛИЦЫ!
-const SPREADSHEET_ID = 'ТВОЙ_ID_СЮДА';
+// 🔴 ВАЖНО: ЗАМЕНИ ЭТУ СТРОКУ НА ТВОЮ ССЫЛКУ ИЗ APPS SCRIPT!
+const API_URL = 'https://script.google.com/macros/s/AKfycbxIBkKxfT3amNpwM9UydZKSFSBudtTJ_F0taZAUpJnwVdcDS-CGn73UaOBFEv4XLkr3eQ/exec';
 
-// Базовый URL для получения данных
-const BASE_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-
-// Загрузка сотрудников из таблицы
-async function loadEmployeesFromSheet() {
-    try {
-        const url = `${BASE_URL}&sheet=Сотрудники`;
-        const response = await fetch(url);
-        const text = await response.text();
-        
-        // Парсим JSON от Google
-        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = jsonData.table.rows;
-        
-        if (!rows || rows.length < 2) return [];
-        
-        // Преобразуем строки в объекты (пропускаем первую строку с заголовками)
-        const employees = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.c && row.c[1] && row.c[1].v) {
-                employees.push({
-                    id: row.c[0]?.v || Date.now(),
-                    fio: row.c[1]?.v || '',
-                    phone: row.c[2]?.v || '',
-                    rank: row.c[3]?.v || '',
-                    spec: row.c[4]?.v || ''
-                });
-            }
-        }
-        
-        return employees;
-    } catch (error) {
-        console.error('Ошибка загрузки сотрудников:', error);
-        return [];
-    }
-}
-
-// Загрузка лекций
-async function loadLecturesFromSheet() {
-    try {
-        const url = `${BASE_URL}&sheet=Лекции`;
-        const response = await fetch(url);
-        const text = await response.text();
-        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = jsonData.table.rows;
-        
-        if (!rows || rows.length < 2) return [];
-        
-        const lectures = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.c && row.c[1] && row.c[1].v) {
-                lectures.push({
-                    id: row.c[0]?.v || Date.now(),
-                    title: row.c[1]?.v || '',
-                    desc: row.c[2]?.v || ''
-                });
-            }
-        }
-        return lectures;
-    } catch (error) {
-        console.error('Ошибка загрузки лекций:', error);
-        return [];
-    }
-}
-
-// Загрузка тренировок
-async function loadTrainingsFromSheet() {
-    try {
-        const url = `${BASE_URL}&sheet=Тренировки`;
-        const response = await fetch(url);
-        const text = await response.text();
-        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = jsonData.table.rows;
-        
-        if (!rows || rows.length < 2) return [];
-        
-        const trainings = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.c && row.c[1] && row.c[1].v) {
-                trainings.push({
-                    id: row.c[0]?.v || Date.now(),
-                    name: row.c[1]?.v || '',
-                    method: row.c[2]?.v || ''
-                });
-            }
-        }
-        return trainings;
-    } catch (error) {
-        console.error('Ошибка загрузки тренировок:', error);
-        return [];
-    }
-}
-
-// Загрузка инвентаря
-async function loadInventoryFromSheet() {
-    try {
-        const url = `${BASE_URL}&sheet=Инвентарь`;
-        const response = await fetch(url);
-        const text = await response.text();
-        const jsonData = JSON.parse(text.substring(47).slice(0, -2));
-        const rows = jsonData.table.rows;
-        
-        if (!rows || rows.length < 2) return [];
-        
-        const inventory = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.c && row.c[1] && row.c[1].v) {
-                inventory.push({
-                    id: row.c[0]?.v || i,
-                    name: row.c[1]?.v || '',
-                    count: parseInt(row.c[2]?.v) || 0
-                });
-            }
-        }
-        return inventory;
-    } catch (error) {
-        console.error('Ошибка загрузки инвентаря:', error);
-        return [];
-    }
-}
-
-// Главная функция загрузки всех данных
-async function loadAllDataFromSheets() {
+// ============ 1. ЗАГРУЗКА ДАННЫХ (ЧТЕНИЕ) ============
+async function loadAllData() {
     console.log('🔄 Загрузка данных из Google Sheets...');
+    showToast('📡 Синхронизация с облаком...');
     
-    const [employees, lectures, trainings, inventory] = await Promise.all([
-        loadEmployeesFromSheet(),
-        loadLecturesFromSheet(),
-        loadTrainingsFromSheet(),
-        loadInventoryFromSheet()
-    ]);
-    
-    return { employees, lectures, trainings, inventory };
+    try {
+        // Отправляем запрос к твоему Apps Script
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        // Сохраняем данные в глобальные переменные
+        window.employees = data.employees || [];
+        window.lecturesArr = data.lectures || [];
+        window.trainingsArr = data.trainings || [];
+        window.inventory = data.inventory || [];
+        
+        // Сохраняем копию в localStorage (на случай, если интернет пропадёт)
+        localStorage.setItem('cpps_emp', JSON.stringify(window.employees));
+        localStorage.setItem('cpps_lectures', JSON.stringify(window.lecturesArr));
+        localStorage.setItem('cpps_trainings', JSON.stringify(window.trainingsArr));
+        localStorage.setItem('cpps_inv', JSON.stringify(window.inventory));
+        
+        // Обновляем всё, что видит пользователь
+        if (typeof renderEmployees === 'function') renderEmployees();
+        if (typeof renderLectures === 'function') renderLectures();
+        if (typeof renderTrainings === 'function') renderTrainings();
+        if (typeof renderInventory === 'function') renderInventory();
+        if (typeof updateStatsUI === 'function') updateStatsUI();
+        
+        console.log('✅ Данные загружены:', {
+            сотрудников: window.employees.length,
+            лекций: window.lecturesArr.length,
+            тренировок: window.trainingsArr.length,
+            инвентаря: window.inventory.length
+        });
+        
+        showToast('✅ Данные синхронизированы!');
+        
+    } catch (error) {
+        console.error('❌ Ошибка загрузки:', error);
+        showToast('⚠️ Ошибка соединения. Использую локальные данные.');
+        
+        // Если интернета нет — берём данные из localStorage
+        window.employees = JSON.parse(localStorage.getItem('cpps_emp')) || [];
+        window.lecturesArr = JSON.parse(localStorage.getItem('cpps_lectures')) || [];
+        window.trainingsArr = JSON.parse(localStorage.getItem('cpps_trainings')) || [];
+        window.inventory = JSON.parse(localStorage.getItem('cpps_inv')) || [];
+    }
 }
 
-// Функция для ручного обновления
-async function refreshAllData() {
-    showNotification('🔄 Обновление данных...');
-    const data = await loadAllDataFromSheets();
+// ============ 2. ДОБАВЛЕНИЕ СОТРУДНИКА ============
+async function syncAddEmployee(employee) {
+    showToast('📤 Отправка сотрудника в облако...');
     
-    if (data.employees.length > 0) {
-        window.employees = data.employees;
-        localStorage.setItem('cpps_emp', JSON.stringify(data.employees));
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'addEmployee',
+                employee: employee
+            })
+        });
+        
+        // После добавления — перезагружаем все данные
+        await loadAllData();
+        showToast('✅ Сотрудник добавлен! Все видят обновление.');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('❌ Ошибка! Проверь интернет.');
+        return false;
     }
-    if (data.lectures.length > 0) {
-        window.lecturesArr = data.lectures;
-        localStorage.setItem('cpps_lectures', JSON.stringify(data.lectures));
-    }
-    if (data.trainings.length > 0) {
-        window.trainingsArr = data.trainings;
-        localStorage.setItem('cpps_trainings', JSON.stringify(data.trainings));
-    }
-    if (data.inventory.length > 0) {
-        window.inventory = data.inventory;
-        localStorage.setItem('cpps_inv', JSON.stringify(data.inventory));
-    }
-    
-    // Обновляем интерфейс
-    if (typeof renderEmployees === 'function') renderEmployees();
-    if (typeof renderLectures === 'function') renderLectures();
-    if (typeof renderTrainings === 'function') renderTrainings();
-    if (typeof renderInventory === 'function') renderInventory();
-    if (typeof updateStatsUI === 'function') updateStatsUI();
-    
-    showNotification('✅ Данные обновлены из Google Sheets!');
 }
 
-// Уведомление
-function showNotification(message) {
-    let toast = document.querySelector('.toast-notification');
+// ============ 3. УДАЛЕНИЕ СОТРУДНИКА ============
+async function syncDeleteEmployee(id) {
+    showToast('🗑️ Удаление сотрудника...');
+    
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'deleteEmployee',
+                id: id
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Сотрудник удалён');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('❌ Ошибка удаления');
+        return false;
+    }
+}
+
+// ============ 4. ДОБАВЛЕНИЕ ЛЕКЦИИ ============
+async function syncAddLecture(lecture) {
+    showToast('📤 Отправка лекции...');
+    
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'addLecture',
+                lecture: lecture
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Лекция добавлена!');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('❌ Ошибка');
+        return false;
+    }
+}
+
+// ============ 5. УДАЛЕНИЕ ЛЕКЦИИ ============
+async function syncDeleteLecture(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'deleteLecture',
+                id: id
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Лекция удалена');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        return false;
+    }
+}
+
+// ============ 6. ДОБАВЛЕНИЕ ТРЕНИРОВКИ ============
+async function syncAddTraining(training) {
+    showToast('📤 Отправка тренировки...');
+    
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'addTraining',
+                training: training
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Тренировка добавлена!');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        return false;
+    }
+}
+
+// ============ 7. УДАЛЕНИЕ ТРЕНИРОВКИ ============
+async function syncDeleteTraining(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'deleteTraining',
+                id: id
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Тренировка удалена');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        return false;
+    }
+}
+
+// ============ 8. ДОБАВЛЕНИЕ ИНВЕНТАРЯ ============
+async function syncAddInventory(item) {
+    showToast('📤 Отправка инвентаря...');
+    
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'addInventory',
+                inventory: item
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Инвентарь добавлен!');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        return false;
+    }
+}
+
+// ============ 9. УДАЛЕНИЕ ИНВЕНТАРЯ ============
+async function syncDeleteInventory(id) {
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'deleteInventory',
+                id: id
+            })
+        });
+        
+        await loadAllData();
+        showToast('✅ Инвентарь удалён');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        return false;
+    }
+}
+
+// ============ 10. УВЕДОМЛЕНИЯ (TOAST) ============
+function showToast(message) {
+    // Ищем или создаём элемент для уведомлений
+    let toast = document.querySelector('.cpps-toast');
     if (!toast) {
         toast = document.createElement('div');
-        toast.className = 'toast-notification';
+        toast.className = 'cpps-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1E293B;
+            border-left: 4px solid #0EA5E9;
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+            font-family: monospace;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            animation: slideIn 0.3s ease;
+        `;
         document.body.appendChild(toast);
     }
+    
     toast.textContent = message;
     toast.style.display = 'block';
+    
     setTimeout(() => {
         toast.style.display = 'none';
     }, 3000);
 }
 
-// Добавляем кнопку обновления на сайт
-function addRefreshButton() {
-    const statsWidget = document.getElementById('statsWidget');
-    if (statsWidget && !document.getElementById('refreshSheetBtn')) {
-        const refreshBtn = document.createElement('button');
-        refreshBtn.id = 'refreshSheetBtn';
-        refreshBtn.className = 'btn-icon';
-        refreshBtn.style.position = 'fixed';
-        refreshBtn.style.bottom = '20px';
-        refreshBtn.style.right = '20px';
-        refreshBtn.style.zIndex = '1000';
-        refreshBtn.style.borderRadius = '50%';
-        refreshBtn.style.width = '50px';
-        refreshBtn.style.height = '50px';
-        refreshBtn.style.fontSize = '20px';
-        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-        refreshBtn.title = 'Обновить данные из Google Sheets';
-        refreshBtn.onclick = () => refreshAllData();
-        document.body.appendChild(refreshBtn);
+// ============ 11. КНОПКА ДЛЯ РУЧНОЙ СИНХРОНИЗАЦИИ ============
+function addSyncButton() {
+    if (!document.getElementById('manualSyncBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'manualSyncBtn';
+        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i>';
+        btn.title = 'Синхронизировать с облаком';
+        btn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0EA5E9, #8B5CF6);
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        `;
+        btn.onmouseenter = () => btn.style.transform = 'scale(1.05)';
+        btn.onmouseleave = () => btn.style.transform = 'scale(1)';
+        btn.onclick = () => loadAllData();
+        document.body.appendChild(btn);
     }
 }
 
-// Автоматическая загрузка при старте
-async function initGoogleSheets() {
-    await refreshAllData();
-    addRefreshButton();
+// ============ 12. АВТОЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ============
+async function initSync() {
+    // Загружаем данные
+    await loadAllData();
+    
+    // Добавляем кнопку синхронизации
+    addSyncButton();
+    
+    // Авто-обновление каждые 30 секунд
+    setInterval(() => {
+        console.log('🔄 Авто-синхронизация...');
+        loadAllData();
+    }, 30000);
+    
+    console.log('✅ Система синхронизации запущена!');
 }
 
-// Запускаем после загрузки страницы
+// Запускаем всё, когда страница загрузится
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initGoogleSheets);
+    document.addEventListener('DOMContentLoaded', initSync);
 } else {
-    initGoogleSheets();
+    initSync();
 }
