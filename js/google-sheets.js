@@ -3,7 +3,7 @@
 // ============================================
 
 // 🔴 ВАЖНО: ЗАМЕНИ ЭТУ СТРОКУ НА ТВОЮ ССЫЛКУ ИЗ APPS SCRIPT!
-const API_URL = 'https://script.google.com/macros/s/AKfycbz_5D6TaFLBiZS0wUesgGWTEKkTcc6oo5vQYO0haEXNYnxyHyfvrCfcGcX8lvT3rzYaBw/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbz85-hGoCnRZ04dKULBs_5y2nsEOtxVfI8RDK3neb22yL_fzqb8B6c75-9kJcXYzl9WwA/exec';
 // ============ 1. ЗАГРУЗКА ДАННЫХ (ЧТЕНИЕ) ============
 async function loadAllData() {
     console.log('🔄 Загрузка данных из Google Sheets...');
