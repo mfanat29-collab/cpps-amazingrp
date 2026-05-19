@@ -81,6 +81,7 @@
         .logo-area { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg,#38BDF8,#A78BFA); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .user-chip { background: #1E293B; border-radius: 3rem; padding: 0.5rem 1.2rem; display: flex; gap: 10px; align-items: center; }
         .nav-tabs-grid {
+            <div class="nav-pill" data-section="requests"><i class="fas fa-file-signature"></i> ЗАЯВКИ</div>
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
@@ -169,7 +170,31 @@
         <div id="weaponSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-gun"></i> Учёт вооружения / инвентаря</h2><div id="inventoryList"></div><div class="flex-between"><input type="text" id="invName" placeholder="Наименование"><input type="text" id="invCount" placeholder="Кол-во"><button id="addInventoryBtn" class="btn-icon">Добавить</button></div></div></div>
         <div id="settingsSection" class="section-dashboard"><div class="glass-panel" style="padding:1.8rem;"><h2><i class="fas fa-palette"></i> Премиум кастомизация</h2><label>Акцент (RGB/HEX): </label><input type="color" id="themeColorPick" value="#0EA5E9"><button id="applyThemeBtn" class="btn-icon">Применить глобально</button><label style="margin-top:1rem;">Фоновый режим: </label><select id="bgModeSelect"><option value="dark">Кибер-тёмный</option><option value="space">Глубокий космос</option><option value="military">Тактический градиент</option></select><button id="applyBgBtn" class="btn-icon">Сменить фон</button><hr style="margin:1rem 0"><h3>⚙️ Интеграции API / Умные системы</h3><p>✅ Система логирования действий (console) • Автоматический рассыльщик уведомлений • Эмуляция AI-ассистента</p></div></div>
     </div>
-</div>
+    <!-- РАЗДЕЛ ЗАЯВОК -->
+<div id="requestsSection" class="section-dashboard">
+    <div class="glass-panel" style="padding:1.8rem;">
+        <div class="flex-between">
+            <h2><i class="fas fa-file-signature"></i> Заявки на вступление</h2>
+            <button id="showRequestFormBtn" class="btn-icon"><i class="fas fa-plus-circle"></i> Подать заявку</button>
+        </div>
+        
+        <!-- Форма подачи заявки (скрыта по умолчанию) -->
+        <div id="requestForm" style="display:none; margin-top:1rem;" class="modal-form">
+            <h3>📝 Новая заявка</h3>
+            <input type="text" id="reqFio" placeholder="ФИО" class="input-neo">
+            <input type="text" id="reqRank" placeholder="Звание" class="input-neo">
+            <input type="text" id="reqPosition" placeholder="Должность" class="input-neo">
+            <input type="date" id="reqDate" placeholder="Дата вступления" class="input-neo">
+            <button id="submitRequestBtn" class="btn-glow">✉️ Отправить заявку</button>
+            <button id="cancelRequestBtn" class="btn-outline-light">Отмена</button>
+        </div>
+        
+        <!-- Список заявок -->
+        <div id="requestsList" style="margin-top:1rem;">
+            <!-- Здесь будут отображаться заявки -->
+        </div>
+    </div>
+
 
 <script>
     // МЕГА-ДАННЫЕ (50+ систем эмулировано)
