@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbwhhRPRxn2ETI7BQh_KwNz5EzjS9M-jZMQ5ALK61QavXSDX2a-k0Kz3AvUFD8rtpcGckg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzQMAFF6ddjuuayjiidg6yQiYyOI0Oo34TOGCaMEmzQxSYC6kYFHVnGpXajj2wQJ7EnFw/exec';
 
 async function loadAllData() {
     console.log('🔄 Загрузка...');
