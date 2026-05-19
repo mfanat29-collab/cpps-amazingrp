@@ -223,12 +223,16 @@
     document.getElementById('loginMainForm')?.addEventListener('submit',(e)=>{ e.preventDefault(); let u=document.getElementById('loginUser').value; let p=document.getElementById('loginPass').value; if((u==='ivanov'||u==='komendant'||u==='instructor') && p==='123'){ currentUser={name:u==='ivanov'?'Иванов П.':u==='komendant'?'Комендант':'Инструктор', role:u==='ivanov'?'Начальник':'Командир'}; localStorage.setItem('cpps_user',JSON.stringify(currentUser)); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=currentUser.name; document.getElementById('userRoleBadge').innerText=currentUser.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); } else alert("Доступ только по коду!"); });
     document.getElementById('globalLogout')?.addEventListener('click',()=>{ localStorage.removeItem('cpps_user'); location.reload(); });
     if(localStorage.getItem('cpps_user')){ let u=JSON.parse(localStorage.getItem('cpps_user')); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=u.name; document.getElementById('userRoleBadge').innerText=u.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); }
-       // ========== ПЕРЕХВАТ КНОПОК ДЛЯ СИНХРОНИЗАЦИИ ==========
+        // ========== ПЕРЕХВАТ КНОПОК ДЛЯ ОТПРАВКИ В ТАБЛИЦУ ==========
     
     // Переопределяем добавление сотрудника
-    const originalSaveBtn = document.getElementById('saveEmployeeBtn');
-    if (originalSaveBtn) {
-        originalSaveBtn.addEventListener('click', async (e) => {
+    const saveBtn = document.getElementById('saveEmployeeBtn');
+    if (saveBtn) {
+        // Удаляем старые обработчики (создаём новую кнопку)
+        const newBtn = saveBtn.cloneNode(true);
+        saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+        
+        newBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const fio = document.getElementById('empFio').value;
             if (!fio) return alert('Введите ФИО');
@@ -240,25 +244,34 @@
                 spec: document.getElementById('empSpecial').value
             };
             
-            showToast('📤 Отправка в облако...');
+            showToast('📤 Отправка в таблицу...');
+            
             if (typeof syncAddEmployee === 'function') {
-                await syncAddEmployee(newEmployee);
-                document.getElementById('employeeFormModal').style.display = 'none';
-                document.getElementById('empFio').value = '';
-                document.getElementById('empPhone').value = '';
-                document.getElementById('empRank').value = '';
-                document.getElementById('empSpecial').value = '';
+                const result = await syncAddEmployee(newEmployee);
+                if (result) {
+                    document.getElementById('employeeFormModal').style.display = 'none';
+                    document.getElementById('empFio').value = '';
+                    document.getElementById('empPhone').value = '';
+                    document.getElementById('empRank').value = '';
+                    document.getElementById('empSpecial').value = '';
+                    showToast('✅ Сотрудник добавлен в таблицу!');
+                } else {
+                    showToast('❌ Ошибка при добавлении');
+                }
             } else {
                 console.error('syncAddEmployee не найдена!');
-                alert('Ошибка синхронизации');
+                alert('Ошибка: функция синхронизации не загружена. Проверь подключение google-sheets.js');
             }
         });
     }
     
     // Переопределяем добавление лекции
-    const originalLectureBtn = document.getElementById('saveLectureBtn');
-    if (originalLectureBtn) {
-        originalLectureBtn.addEventListener('click', async (e) => {
+    const lectureBtn = document.getElementById('saveLectureBtn');
+    if (lectureBtn) {
+        const newLectureBtn = lectureBtn.cloneNode(true);
+        lectureBtn.parentNode.replaceChild(newLectureBtn, lectureBtn);
+        
+        newLectureBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const title = document.getElementById('lectTitle').value;
             if (!title) return alert('Введите название');
@@ -274,14 +287,20 @@
                 document.getElementById('lectureFormAdd').style.display = 'none';
                 document.getElementById('lectTitle').value = '';
                 document.getElementById('lectDesc').value = '';
+                showToast('✅ Лекция добавлена в таблицу!');
+            } else {
+                alert('Ошибка: syncAddLecture не найдена');
             }
         });
     }
     
     // Переопределяем добавление тренировки
-    const originalTrainingBtn = document.getElementById('saveTrainingMethodBtn');
-    if (originalTrainingBtn) {
-        originalTrainingBtn.addEventListener('click', async (e) => {
+    const trainingBtn = document.getElementById('saveTrainingMethodBtn');
+    if (trainingBtn) {
+        const newTrainingBtn = trainingBtn.cloneNode(true);
+        trainingBtn.parentNode.replaceChild(newTrainingBtn, trainingBtn);
+        
+        newTrainingBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const name = document.getElementById('trainName').value;
             if (!name) return alert('Введите название');
@@ -297,14 +316,20 @@
                 document.getElementById('trainingFormAdd').style.display = 'none';
                 document.getElementById('trainName').value = '';
                 document.getElementById('trainMethod').value = '';
+                showToast('✅ Тренировка добавлена в таблицу!');
+            } else {
+                alert('Ошибка: syncAddTraining не найдена');
             }
         });
     }
     
     // Переопределяем добавление инвентаря
-    const originalInventoryBtn = document.getElementById('addInventoryBtn');
-    if (originalInventoryBtn) {
-        originalInventoryBtn.addEventListener('click', async (e) => {
+    const inventoryBtn = document.getElementById('addInventoryBtn');
+    if (inventoryBtn) {
+        const newInventoryBtn = inventoryBtn.cloneNode(true);
+        inventoryBtn.parentNode.replaceChild(newInventoryBtn, inventoryBtn);
+        
+        newInventoryBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const name = document.getElementById('invName').value;
             const count = parseInt(document.getElementById('invCount').value);
@@ -320,6 +345,9 @@
                 await syncAddInventory(newItem);
                 document.getElementById('invName').value = '';
                 document.getElementById('invCount').value = '';
+                showToast('✅ Инвентарь добавлен в таблицу!');
+            } else {
+                alert('Ошибка: syncAddInventory не найдена');
             }
         });
     }
@@ -331,17 +359,11 @@
             toast = document.createElement('div');
             toast.className = 'cpps-toast';
             toast.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: #1E293B;
-                border-left: 4px solid #0EA5E9;
-                border-radius: 12px;
-                padding: 12px 20px;
-                color: white;
-                font-size: 14px;
-                z-index: 10000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                position: fixed; bottom: 20px; right: 20px;
+                background: #1E293B; border-left: 4px solid #0EA5E9;
+                border-radius: 12px; padding: 12px 20px;
+                color: white; font-size: 14px; z-index: 10000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             `;
             document.body.appendChild(toast);
         }
@@ -350,7 +372,7 @@
         setTimeout(() => { toast.style.display = 'none'; }, 3000);
     }
     
-    console.log('✅ Система синхронизации активирована!');
+    console.log('✅ Перехват кнопок активирован! Запись в таблицу работает!');
 </script>
     <!-- Подключение Google Sheets -->
 <script src="js/google-sheets.js"></script>
