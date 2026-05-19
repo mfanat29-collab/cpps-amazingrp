@@ -8,8 +8,11 @@ async function syncDeleteEmployee(id) {
             body: JSON.stringify({ action: 'deleteEmployee', id: id })
         });
         setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Сотрудник удалён из таблицы!');
-    } catch(e) { showToast('❌ Ошибка удаления'); }
+        showToast('✅ Сотрудник удален из таблицы!');
+    } catch(e) { 
+        showToast('❌ Ошибка при удалении');
+        console.error(e);
+    }
 }
 
 async function syncDeleteLecture(id) {
@@ -20,7 +23,10 @@ async function syncDeleteLecture(id) {
         });
         setTimeout(() => loadAllData(), 1000);
         showToast('✅ Лекция удалена!');
-    } catch(e) { showToast('❌ Ошибка'); }
+    } catch(e) { 
+        showToast('❌ Ошибка');
+        console.error(e);
+    }
 }
 
 async function syncDeleteTraining(id) {
@@ -31,7 +37,10 @@ async function syncDeleteTraining(id) {
         });
         setTimeout(() => loadAllData(), 1000);
         showToast('✅ Тренировка удалена!');
-    } catch(e) { showToast('❌ Ошибка'); }
+    } catch(e) { 
+        showToast('❌ Ошибка');
+        console.error(e);
+    }
 }
 
 async function syncDeleteInventory(id) {
@@ -41,8 +50,11 @@ async function syncDeleteInventory(id) {
             body: JSON.stringify({ action: 'deleteInventory', id: id })
         });
         setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Инвентарь удалён!');
-    } catch(e) { showToast('❌ Ошибка'); }
+        showToast('✅ Инвентарь удален!');
+    } catch(e) { 
+        showToast('❌ Ошибка');
+        console.error(e);
+    }
 }
 async function loadAllData() {
     console.log('🔄 Загрузка...');
