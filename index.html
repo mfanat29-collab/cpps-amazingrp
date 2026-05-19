@@ -373,6 +373,124 @@
     }
     
     console.log('✅ Перехват кнопок активирован! Запись в таблицу работает!');
+// ========== ФУНКЦИИ ДЛЯ СИНХРОНИЗАЦИИ УДАЛЕНИЯ ==========
+
+// Перехватываем клики по кнопкам удаления сотрудников
+function setupDeleteHandlers() {
+    // Удаление сотрудников
+    document.querySelectorAll('.delEmp, [data-action="deleteEmployee"]').forEach(btn => {
+        btn.removeEventListener('click', window._oldDeleteHandler);
+        const newHandler = async (e) => {
+            e.preventDefault();
+            const id = parseInt(btn.dataset.id || btn.getAttribute('data-id'));
+            if (!id) return;
+            
+            if (confirm('Удалить сотрудника? Данные удалятся для всех!')) {
+                if (typeof syncDeleteEmployee === 'function') {
+                    showToast('🗑️ Удаление...');
+                    await syncDeleteEmployee(id);
+                } else {
+                    // Локальное удаление
+                    if (window.employees) {
+                        window.employees = window.employees.filter(emp => emp.id !== id);
+                        if (window.stroyMembers) {
+                            window.stroyMembers = window.stroyMembers.filter(i => i !== id);
+                        }
+                        if (typeof saveAll === 'function') saveAll();
+                        if (typeof renderEmployees === 'function') renderEmployees();
+                        if (typeof renderStroy === 'function') renderStroy();
+                        if (typeof updateStatsUI === 'function') updateStatsUI();
+                    }
+                }
+            }
+        };
+        btn.addEventListener('click', newHandler);
+        btn._deleteHandler = newHandler;
+    });
+    
+    // Удаление лекций
+    document.querySelectorAll('.delLect, [data-action="deleteLecture"]').forEach(btn => {
+        btn.removeEventListener('click', window._oldLectureHandler);
+        const newHandler = async (e) => {
+            e.preventDefault();
+            const id = parseInt(btn.dataset.id);
+            if (!id) return;
+            
+            if (confirm('Удалить лекцию?')) {
+                if (typeof syncDeleteLecture === 'function') {
+                    showToast('🗑️ Удаление...');
+                    await syncDeleteLecture(id);
+                } else if (window.lecturesArr) {
+                    window.lecturesArr = window.lecturesArr.filter(l => l.id !== id);
+                    if (typeof saveAll === 'function') saveAll();
+                    if (typeof renderLectures === 'function') renderLectures();
+                    if (typeof updateStatsUI === 'function') updateStatsUI();
+                }
+            }
+        };
+        btn.addEventListener('click', newHandler);
+        btn._lectureHandler = newHandler;
+    });
+    
+    // Удаление тренировок
+    document.querySelectorAll('.delTrain, [data-action="deleteTraining"]').forEach(btn => {
+        btn.removeEventListener('click', window._oldTrainHandler);
+        const newHandler = async (e) => {
+            e.preventDefault();
+            const id = parseInt(btn.dataset.id);
+            if (!id) return;
+            
+            if (confirm('Удалить тренировку?')) {
+                if (typeof syncDeleteTraining === 'function') {
+                    showToast('🗑️ Удаление...');
+                    await syncDeleteTraining(id);
+                } else if (window.trainingsArr) {
+                    window.trainingsArr = window.trainingsArr.filter(t => t.id !== id);
+                    if (typeof saveAll === 'function') saveAll();
+                    if (typeof renderTrainings === 'function') renderTrainings();
+                    if (typeof updateStatsUI === 'function') updateStatsUI();
+                }
+            }
+        };
+        btn.addEventListener('click', newHandler);
+        btn._trainHandler = newHandler;
+    });
+    
+    // Удаление инвентаря
+    document.querySelectorAll('.delInv, [data-action="deleteInventory"]').forEach(btn => {
+        btn.removeEventListener('click', window._oldInvHandler);
+        const newHandler = async (e) => {
+            e.preventDefault();
+            const id = parseInt(btn.dataset.idx || btn.dataset.id);
+            if (isNaN(id)) return;
+            
+            if (confirm('Удалить инвентарь?')) {
+                if (typeof syncDeleteInventory === 'function') {
+                    showToast('🗑️ Удаление...');
+                    await syncDeleteInventory(id);
+                } else if (window.inventory) {
+                    window.inventory = window.inventory.filter((_, i) => i !== id);
+                    if (typeof saveAll === 'function') saveAll();
+                    if (typeof renderInventory === 'function') renderInventory();
+                    if (typeof updateStatsUI === 'function') updateStatsUI();
+                }
+            }
+        };
+        btn.addEventListener('click', newHandler);
+        btn._invHandler = newHandler;
+    });
+}
+
+// Запускаем настройку обработчиков после загрузки страницы
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupDeleteHandlers);
+} else {
+    setupDeleteHandlers();
+}
+
+// Также запускаем после каждого обновления данных (если есть MutationObserver)
+const observer = new MutationObserver(() => setupDeleteHandlers());
+observer.observe(document.body, { childList: true, subtree: true });
 </script>
     <!-- Подключение Google Sheets -->
 <script src="js/google-sheets.js"></script>
