@@ -43,6 +43,7 @@ async function syncAddEmployee(employee) {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
+            mode: 'no-cors',           // ← ЭТУ СТРОКУ ДОБАВИТЬ!
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addEmployee', employee: employee })
         });
@@ -68,6 +69,7 @@ async function syncAddLecture(lecture) {
     try {
         await fetch(API_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addLecture', lecture: lecture })
         });
@@ -83,6 +85,7 @@ async function syncAddTraining(training) {
     try {
         await fetch(API_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addTraining', training: training })
         });
@@ -98,6 +101,7 @@ async function syncAddInventory(item) {
     try {
         await fetch(API_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'addInventory', inventory: item })
         });
