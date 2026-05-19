@@ -223,8 +223,138 @@
     document.getElementById('loginMainForm')?.addEventListener('submit',(e)=>{ e.preventDefault(); let u=document.getElementById('loginUser').value; let p=document.getElementById('loginPass').value; if((u==='ivanov'||u==='komendant'||u==='instructor') && p==='123'){ currentUser={name:u==='ivanov'?'Иванов П.':u==='komendant'?'Комендант':'Инструктор', role:u==='ivanov'?'Начальник':'Командир'}; localStorage.setItem('cpps_user',JSON.stringify(currentUser)); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=currentUser.name; document.getElementById('userRoleBadge').innerText=currentUser.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); } else alert("Доступ только по коду!"); });
     document.getElementById('globalLogout')?.addEventListener('click',()=>{ localStorage.removeItem('cpps_user'); location.reload(); });
     if(localStorage.getItem('cpps_user')){ let u=JSON.parse(localStorage.getItem('cpps_user')); document.getElementById('authScreen').style.display='none'; document.getElementById('mainApp').style.display='block'; document.getElementById('userFullName').innerText=u.name; document.getElementById('userRoleBadge').innerText=u.role; renderEmployees(); renderStroy(); renderLectures(); renderTrainings(); renderDocs(); renderEvents(); renderInventory(); updateStatsUI(); renderReports(); setInterval(()=>{ let d=new Date(); document.getElementById('liveDateTime')&&(document.getElementById('liveDateTime').innerHTML=d.toLocaleString()); },1000); }
+       // ========== ПЕРЕХВАТ КНОПОК ДЛЯ СИНХРОНИЗАЦИИ ==========
+    
+    // Переопределяем добавление сотрудника
+    const originalSaveBtn = document.getElementById('saveEmployeeBtn');
+    if (originalSaveBtn) {
+        originalSaveBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const fio = document.getElementById('empFio').value;
+            if (!fio) return alert('Введите ФИО');
+            
+            const newEmployee = {
+                fio: fio,
+                phone: document.getElementById('empPhone').value,
+                rank: document.getElementById('empRank').value,
+                spec: document.getElementById('empSpecial').value
+            };
+            
+            showToast('📤 Отправка в облако...');
+            if (typeof syncAddEmployee === 'function') {
+                await syncAddEmployee(newEmployee);
+                document.getElementById('employeeFormModal').style.display = 'none';
+                document.getElementById('empFio').value = '';
+                document.getElementById('empPhone').value = '';
+                document.getElementById('empRank').value = '';
+                document.getElementById('empSpecial').value = '';
+            } else {
+                console.error('syncAddEmployee не найдена!');
+                alert('Ошибка синхронизации');
+            }
+        });
+    }
+    
+    // Переопределяем добавление лекции
+    const originalLectureBtn = document.getElementById('saveLectureBtn');
+    if (originalLectureBtn) {
+        originalLectureBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('lectTitle').value;
+            if (!title) return alert('Введите название');
+            
+            const newLecture = {
+                title: title,
+                desc: document.getElementById('lectDesc').value
+            };
+            
+            showToast('📤 Отправка лекции...');
+            if (typeof syncAddLecture === 'function') {
+                await syncAddLecture(newLecture);
+                document.getElementById('lectureFormAdd').style.display = 'none';
+                document.getElementById('lectTitle').value = '';
+                document.getElementById('lectDesc').value = '';
+            }
+        });
+    }
+    
+    // Переопределяем добавление тренировки
+    const originalTrainingBtn = document.getElementById('saveTrainingMethodBtn');
+    if (originalTrainingBtn) {
+        originalTrainingBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('trainName').value;
+            if (!name) return alert('Введите название');
+            
+            const newTraining = {
+                name: name,
+                method: document.getElementById('trainMethod').value
+            };
+            
+            showToast('📤 Отправка тренировки...');
+            if (typeof syncAddTraining === 'function') {
+                await syncAddTraining(newTraining);
+                document.getElementById('trainingFormAdd').style.display = 'none';
+                document.getElementById('trainName').value = '';
+                document.getElementById('trainMethod').value = '';
+            }
+        });
+    }
+    
+    // Переопределяем добавление инвентаря
+    const originalInventoryBtn = document.getElementById('addInventoryBtn');
+    if (originalInventoryBtn) {
+        originalInventoryBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('invName').value;
+            const count = parseInt(document.getElementById('invCount').value);
+            if (!name || !count) return alert('Заполните все поля');
+            
+            const newItem = {
+                name: name,
+                count: count
+            };
+            
+            showToast('📤 Отправка инвентаря...');
+            if (typeof syncAddInventory === 'function') {
+                await syncAddInventory(newItem);
+                document.getElementById('invName').value = '';
+                document.getElementById('invCount').value = '';
+            }
+        });
+    }
+    
+    // Функция для уведомлений
+    function showToast(message) {
+        let toast = document.querySelector('.cpps-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'cpps-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #1E293B;
+                border-left: 4px solid #0EA5E9;
+                border-radius: 12px;
+                padding: 12px 20px;
+                color: white;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            `;
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+    
+    console.log('✅ Система синхронизации активирована!');
 </script>
     <!-- Подключение Google Sheets -->
 <script src="js/google-sheets.js"></script>
+</body>
+</html>
 </body>
 </html>
