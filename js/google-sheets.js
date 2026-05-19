@@ -317,19 +317,43 @@ function addSyncButton() {
 
 // ============ 12. АВТОЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ============
 async function initSync() {
-    // Загружаем данные
+    // Первая загрузка
     await loadAllData();
-    
-    // Добавляем кнопку синхронизации
     addSyncButton();
     
-    // Авто-обновление каждые 30 секунд
-    setInterval(() => {
+    // АВТО-ОБНОВЛЕНИЕ КАЖДЫЕ 10 СЕКУНД
+    setInterval(async () => {
         console.log('🔄 Авто-синхронизация...');
-        loadAllData();
-    }, 30000);
+        await loadAllData();
+    }, 10000);
     
-    console.log('✅ Система синхронизации запущена!');
+    // Добавляем кнопку ручного обновления
+    addManualRefreshButton();
+}
+
+// Кнопка для ручного обновления
+function addManualRefreshButton() {
+    if (document.getElementById('refreshDataBtn')) return;
+    
+    const btn = document.createElement('button');
+    btn.id = 'refreshDataBtn';
+    btn.innerHTML = '🔄 Обновить данные';
+    btn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: #0EA5E9;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    `;
+    btn.onclick = () => loadAllData();
+    document.body.appendChild(btn);
 }
 
 // Запускаем всё, когда страница загрузится
