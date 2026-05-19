@@ -1,102 +1,64 @@
-// ============================================
-// ЦППС - РАБОЧАЯ ВЕРСИЯ (JSONP + POST)
-// ============================================
+const API_URL = 'https://script.google.com/home/projects/1SX8GcdqgjnJj5z7DYQeX-hBvhYrfjSZ3DcT9a1yEGo-ku8vaCMHOaqWZ/edit';
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwG2hmFRFdiC1hgo3fGzHbMI8nOxAzgdDhR9fILcZZuvEsu45mNOoIejKqF1Wc25K3wiA/exec';
-
-// ========== ЗАГРУЗКА ДАННЫХ (JSONP - без CORS) ==========
-function loadAllData() {
-    console.log('🔄 Загрузка данных...');
-    
-    const callbackName = 'callback_' + Date.now();
-    
-    window[callbackName] = function(data) {
-        console.log('✅ Данные получены:', data);
-        
-        if (window.employees !== undefined) {
-            window.employees = data.employees || [];
-            window.lecturesArr = data.lectures || [];
-            window.trainingsArr = data.trainings || [];
-            window.inventory = data.inventory || [];
-            
-            localStorage.setItem('cpps_emp', JSON.stringify(window.employees));
-            localStorage.setItem('cpps_lectures', JSON.stringify(window.lecturesArr));
-            localStorage.setItem('cpps_trainings', JSON.stringify(window.trainingsArr));
-            localStorage.setItem('cpps_inv', JSON.stringify(window.inventory));
-            
-            if (typeof renderEmployees === 'function') renderEmployees();
-            if (typeof renderLectures === 'function') renderLectures();
-            if (typeof renderTrainings === 'function') renderTrainings();
-            if (typeof renderInventory === 'function') renderInventory();
-            if (typeof updateStatsUI === 'function') updateStatsUI();
-            
-            showToast(`✅ Загружено: ${window.employees.length} сотрудников`);
-        }
-        
-        delete window[callbackName];
-        if (script) document.body.removeChild(script);
-    };
-    
-    const script = document.createElement('script');
-    script.src = `${API_URL}?callback=${callbackName}`;
-    script.onerror = () => {
-        showToast('⚠️ Ошибка соединения');
-        delete window[callbackName];
-    };
-    document.body.appendChild(script);
-}
-
-// ========== ОТПРАВКА ДАННЫХ ==========
-async function syncAddEmployee(employee) {
+async function loadAllData() {
+    console.log('🔄 Загрузка...');
     try {
-        showToast('📤 Отправка...');
-        await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: 'addEmployee', employee: employee })
-        });
-        setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Сотрудник добавлен!');
-        return true;
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        window.employees = data.employees || [];
+        window.lecturesArr = data.lectures || [];
+        window.trainingsArr = data.trainings || [];
+        window.inventory = data.inventory || [];
+        
+        localStorage.setItem('cpps_emp', JSON.stringify(window.employees));
+        localStorage.setItem('cpps_lectures', JSON.stringify(window.lecturesArr));
+        localStorage.setItem('cpps_trainings', JSON.stringify(window.trainingsArr));
+        localStorage.setItem('cpps_inv', JSON.stringify(window.inventory));
+        
+        if (typeof renderEmployees === 'function') renderEmployees();
+        if (typeof renderLectures === 'function') renderLectures();
+        if (typeof renderTrainings === 'function') renderTrainings();
+        if (typeof renderInventory === 'function') renderInventory();
+        if (typeof updateStatsUI === 'function') updateStatsUI();
+        
+        console.log('✅ Загружено:', window.employees.length);
+        showToast(`✅ Загружено ${window.employees.length} сотрудников`);
     } catch(e) {
-        showToast('❌ Ошибка');
-        return false;
+        console.error('Ошибка:', e);
+        showToast('⚠️ Ошибка загрузки');
     }
 }
 
-async function syncAddLecture(lecture) {
+async function syncAddEmployee(emp) {
     try {
-        await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: 'addLecture', lecture: lecture })
-        });
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addEmployee', employee: emp }) });
         setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Лекция добавлена!');
+        showToast('✅ Сотрудник добавлен');
     } catch(e) { showToast('❌ Ошибка'); }
 }
 
-async function syncAddTraining(training) {
+async function syncAddLecture(lec) {
     try {
-        await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: 'addTraining', training: training })
-        });
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addLecture', lecture: lec }) });
         setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Тренировка добавлена!');
+        showToast('✅ Лекция добавлена');
+    } catch(e) { showToast('❌ Ошибка'); }
+}
+
+async function syncAddTraining(train) {
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addTraining', training: train }) });
+        setTimeout(() => loadAllData(), 1000);
+        showToast('✅ Тренировка добавлена');
     } catch(e) { showToast('❌ Ошибка'); }
 }
 
 async function syncAddInventory(item) {
     try {
-        await fetch(API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ action: 'addInventory', inventory: item })
-        });
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addInventory', inventory: item }) });
         setTimeout(() => loadAllData(), 1000);
-        showToast('✅ Инвентарь добавлен!');
+        showToast('✅ Инвентарь добавлен');
     } catch(e) { showToast('❌ Ошибка'); }
 }
 
@@ -113,7 +75,5 @@ function showToast(msg) {
     setTimeout(() => t.style.display = 'none', 3000);
 }
 
-// ========== АВТОЗАПУСК ==========
 loadAllData();
-setInterval(() => loadAllData(), 15000);
-console.log('✅ JSONP синхронизация запущена!');
+setInterval(() => loadAllData(), 10000);
